@@ -6,7 +6,7 @@ The circular cross-correlation is an important tool to detect similarities betwe
 </br><b> xy (i) = Σ[k=0, n−1] x (k )⋅ y [(i+k ) mod n] </b><br><br>
 
 ## Implementation
-The aim is to convert it into a <b>CUDA program</b> to be run in a <b>GPU</b> under Linux.</br>
+The aim is to develop a <b>CUDA program</b> to be run in a <b>GPU</b> under Linux.</br>
 
 The kernel should compute one cross-correlation point.
 Two approaches should be tried:
