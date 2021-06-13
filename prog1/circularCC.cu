@@ -90,12 +90,12 @@ int main(int argc, char **argv)
   // as an example, n threads are launched where each thread deals with one point
   unsigned int gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ;
 
-  blockDimX = 1 << 0; // optimize!
-  blockDimY = 1 << 0; // optimize!
-  blockDimZ = 1 << 0; // do not change!
-  gridDimX = 1 << n;  // optimize!
-  gridDimY = 1 << 0;  // optimize!
-  gridDimZ = 1 << 0;  // do not change!
+    blockDimX = 1;    // optimize! // 1 thread
+    blockDimY = 1;    // optimize!
+    blockDimZ = 1;    // do not change! // sempre 1
+    gridDimX = n; // optimize!
+    gridDimY = 1;     // optimize!
+    gridDimZ = 1;     // do not change! // sempre 1
 
   dim3 grid(gridDimX, gridDimY, gridDimZ);
   dim3 block(blockDimX, blockDimY, blockDimZ);
