@@ -1,5 +1,6 @@
 //
-// Tomás Oliveira e Silva, November 2017
+// Rafael Sá, 104552, rafael.sa@ua.pt
+// Luís Laranjeira, 81526, lclm@ua.pt
 //
 
 #include <time.h>
@@ -25,18 +26,6 @@ static void generate_samples(double *m, int N);
 int main(int argc, char **argv)
 {
 
-  // check the program arguments
-  /*if (argc < 2)
-  {
-    perror("Please insert the number of samples!");
-    ;
-    exit(EXIT_FAILURE);
-  }*/
-
-  printf("%s Starting...\n", argv[0]);
-  if (sizeof(unsigned int) != (size_t)4)
-    return 1; // fail with prejudice if an integer does not have 4 bytes
-
   // set up device
   int dev = 0;
 
@@ -46,17 +35,17 @@ int main(int argc, char **argv)
   CHECK(cudaSetDevice(dev));
 
   // create memory areas in host and device memory where the disk sectors data and sector numbers will be stored
-  int n = 16384; //16k -> 2^14
-  //sscanf (argv[1],"%d",&n);; //Number of Samples
+  int n = 1 << 16; 
 
-  double *h_x, *h_y;
+  double *h_x, *h_y, *result_cuda, *result_cpu;
+  int nBytes;
 
-  int nBytes = n * sizeof(double); //Storage space in bytes
-  double *result_cuda = (double *)malloc(nBytes);
-  double *result_cpu = (double *)malloc(nBytes);
+  nBytes = n * sizeof(double); //Storage space in bytes
 
   h_x = (double *)malloc(nBytes);
   h_y = (double *)malloc(nBytes);
+  result_cuda = (double *)malloc(nBytes);
+  result_cpu = (double *)malloc(nBytes);
 
   //generate samples for x and y
   (void)get_delta_time();
@@ -119,7 +108,7 @@ int main(int argc, char **argv)
   // reset device
   CHECK(cudaDeviceReset());
 
-  // compute the modified sector data on the CPU
+  // compute the CC on the CPU
   (void)get_delta_time();
   compute_CC_cpu_kernel(n, h_x, h_y, result_cpu);
   printf("The cpu kernel took %.3e seconds to run (single core)\n", get_delta_time());
@@ -127,7 +116,8 @@ int main(int argc, char **argv)
   // compare
   size_t i;
   for (i = 0; i < n; i++)
-    if (result_cpu[i] != result_cuda[i])
+    if((fabs(result_cuda[i] - result_cpu[i]) < 1e-6) || 
+      ((fabs(result_cuda[i]) >= 1e-6 ) && (((result_cuda[i] - result_cpu[i]) / result_cuda[i]) < 1e-6)))
     {
       printf("Mismatch in point %zu, expected %f.\n", i, result_cpu[i]);
       exit(1);
@@ -145,29 +135,33 @@ int main(int argc, char **argv)
 
 static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results)
 {
-  unsigned int point, i;
+  unsigned int point, i, sum;
   for (point = 0; point < n; point++)
   {
+    sum = 0;
     for (i = 0; i < n; i++)
     {
-      results[point] += x[i] * y[(point + i) % n];
+      sum += x[i] * y[(point + i) % n];
     }
+    results[point] = sum;
   }
 }
 
 __global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results)
 {
-  unsigned int x, y, idx, i;
+  unsigned int x, y, idx, i, sum;
 
   // compute the thread number
   x = (unsigned int)threadIdx.x + (unsigned int)blockDim.x * (unsigned int)blockIdx.x;
   y = (unsigned int)threadIdx.y + (unsigned int)blockDim.y * (unsigned int)blockIdx.y;
   idx = (unsigned int)blockDim.x * (unsigned int)gridDim.x * y + x;
 
+  sum = 0;
   for (i = 0; i < n; i++)
   {
-    results[idx] += x_h[i] * h_y[(idx + i) % n];
+    sum += x_h[i] * h_y[(idx + i) % n];
   }
+  results[idx] = sum;
 }
 
 static double get_delta_time(void)
