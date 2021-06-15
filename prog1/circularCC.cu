@@ -116,8 +116,8 @@ int main(int argc, char **argv)
   // compare
   size_t i;
   for (i = 0; i < n; i++)
-    if((fabs(result_cuda[i] - result_cpu[i]) < 1e-6) || 
-      (fabs(result_cuda[i]) >= 1e-6 ) && (((result_cuda[i] - result_cpu[i]) / result_cuda[i]) < 1e-6))
+    if((fabs(result_cuda[i] - result_cpu[i]) >= 1e-6) && 
+      ((fabs(result_cuda[i]) < 1e-6 ) || (((result_cuda[i] - result_cpu[i]) / result_cuda[i]) >= 1e-6)))
     {
       printf("Mismatch in point %zu, expected %f.\n", i, result_cpu[i]);
       exit(1);
