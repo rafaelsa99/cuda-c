@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   size_t i;
   for (i = 0; i < n; i++)
     if((fabs(result_cuda[i] - result_cpu[i]) < 1e-6) || 
-      ((fabs(result_cuda[i]) >= 1e-6 ) && (((result_cuda[i] - result_cpu[i]) / result_cuda[i]) < 1e-6)))
+      (fabs(result_cuda[i]) >= 1e-6 ) && (((result_cuda[i] - result_cpu[i]) / result_cuda[i]) < 1e-6))
     {
       printf("Mismatch in point %zu, expected %f.\n", i, result_cpu[i]);
       exit(1);
@@ -135,10 +135,11 @@ int main(int argc, char **argv)
 
 static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results)
 {
-  unsigned int point, i, sum;
+  unsigned int point, i;
+  double sum;
   for (point = 0; point < n; point++)
   {
-    sum = 0;
+    sum = 0.0;
     for (i = 0; i < n; i++)
     {
       sum += x[i] * y[(point + i) % n];
@@ -149,14 +150,15 @@ static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results)
 
 __global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results)
 {
-  unsigned int x, y, idx, i, sum;
+  unsigned int x, y, idx, i;
+  double sum;
 
   // compute the thread number
   x = (unsigned int)threadIdx.x + (unsigned int)blockDim.x * (unsigned int)blockIdx.x;
   y = (unsigned int)threadIdx.y + (unsigned int)blockDim.y * (unsigned int)blockIdx.y;
   idx = (unsigned int)blockDim.x * (unsigned int)gridDim.x * y + x;
 
-  sum = 0;
+  sum = 0.0;
   for (i = 0; i < n; i++)
   {
     sum += x_h[i] * h_y[(idx + i) % n];
@@ -180,10 +182,10 @@ static double get_delta_time(void)
 static void generate_samples(double *m, int N)
 {
   size_t i;
-  int lower = -0.5;
-  int upper = 0.5;
+  double lower = -0.5;
+  double upper = 0.5;
   for (i = 0; i < N; i++)
   {
-    m[i] = (rand() % (upper - lower + 1)) + lower;
+    m[i] = ((double)rand() * (upper - lower)) / (double)RAND_MAX + lower;
   }
 }
