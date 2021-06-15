@@ -1,4 +1,5 @@
 //
+// Assignment 3 - The threads in a warp compute successive cross-correlation points
 // Rafael Sá, 104552, rafael.sa@ua.pt
 // Luís Laranjeira, 81526, lclm@ua.pt
 //
