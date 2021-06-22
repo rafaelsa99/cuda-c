@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   CHECK(cudaMemcpy(d_x, h_x, nBytes, cudaMemcpyHostToDevice));
   CHECK(cudaMemcpy(d_y, h_y, nBytes, cudaMemcpyHostToDevice));
   printf("The transfer of %d bytes from the host to the device took %.3e seconds\n",
-         3 * nBytes, get_delta_time());
+         2 * nBytes, get_delta_time());
 
   // run the computational kernel
   // as an example, n threads are launched where each thread deals with one point
