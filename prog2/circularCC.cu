@@ -15,8 +15,12 @@
 // program configuration
 //
 
+#ifndef DISTANCE
+# define DISTANCE  1 << 0 // Optimize!
+#endif
+
 static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results);
-__global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results);
+__global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results, int distance);
 static double get_delta_time(void);
 static void generate_samples(double *m, int N);
 
@@ -90,7 +94,7 @@ int main(int argc, char **argv)
     return 1;
   }
   (void)get_delta_time();
-  computeCC_cuda_kernel<<<grid, block>>>(n, d_x, d_y, d_results);
+  computeCC_cuda_kernel<<<grid, block>>>(n, d_x, d_y, d_results, DISTANCE);
   CHECK(cudaDeviceSynchronize()); // wait for kernel to finish
   CHECK(cudaGetLastError());      // check for kernel errors
   printf("The CUDA kernel <<<(%d,%d,%d), (%d,%d,%d)>>> took %.3e seconds to run\n",
@@ -149,9 +153,8 @@ static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results)
   }
 }
 
-__global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results)
+__global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, double *results, int distance)
 {
-  int distance = 5; // optimize!
 
   unsigned int x, y, idx, i;
   double sum;
