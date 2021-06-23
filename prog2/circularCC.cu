@@ -163,7 +163,7 @@ __global__ static void computeCC_cuda_kernel(int n, double *x_h, double *h_y, do
   x = (unsigned int)threadIdx.x + (unsigned int)blockDim.x * (unsigned int)blockIdx.x;
   y = (unsigned int)threadIdx.y + (unsigned int)blockDim.y * (unsigned int)blockIdx.y;
   idx = (unsigned int)blockDim.x * (unsigned int)gridDim.x * y + x;
-  idx = (idx + distance) % n;
+  idx = (idx + (idx % 32)  * (distance - 1)) % n;
 
   sum = 0.0;
   for (i = 0; i < n; i++)
