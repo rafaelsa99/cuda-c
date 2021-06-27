@@ -16,7 +16,7 @@
 //
 
 #ifndef DISTANCE
-# define DISTANCE  (1 << 0) - 1 // Optimize!
+# define DISTANCE  (1 << 2) - 1 // Optimize!
 #endif
 
 static void compute_CC_cpu_kernel(int n, double *x, double *y, double *results);
